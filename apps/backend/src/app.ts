@@ -11,12 +11,12 @@ import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import { generalLimiter } from './middleware/rate-limit';
 import { inngestHandler } from './inngest';
 
-// Import routes (we'll create these)
-// import authRoutes from './routes/auth.routes';
-// import productRoutes from './routes/product.routes';
-// import orderRoutes from './routes/order.routes';
-// import vendorRoutes from './routes/vendor.routes';
-// import paymentRoutes from './routes/payment.routes';
+// Import routes
+import authRoutes from './routes/auth.routes';
+import productRoutes from './routes/product.routes';
+import orderRoutes from './routes/order.routes';
+import vendorRoutes from './routes/vendor.routes';
+import paymentRoutes from './routes/payment.routes';
 
 export const createApp = (): Application => {
   const app = express();
@@ -68,13 +68,15 @@ export const createApp = (): Application => {
   const apiRouter = express.Router();
 
   // API v1 routes
-  // apiRouter.use('/auth', authRoutes);
-  // apiRouter.use('/products', productRoutes);
-  // apiRouter.use('/orders', orderRoutes);
-  // apiRouter.use('/vendors', vendorRoutes);
-  // apiRouter.use('/payments', paymentRoutes);
+  apiRouter.use('/auth', authRoutes);
+  apiRouter.use('/products', productRoutes);
+  apiRouter.use('/orders', orderRoutes);
+  apiRouter.use('/vendors', vendorRoutes);
+  apiRouter.use('/payments', paymentRoutes);
 
   app.use('/api/v1', apiRouter);
+
+  logger.info('All API routes registered');
 
   // Sentry error handler (must be before other error handlers)
   app.use(Sentry.Handlers.errorHandler());
