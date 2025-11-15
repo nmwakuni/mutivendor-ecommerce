@@ -21,6 +21,12 @@ A feature-rich, production-ready multi-vendor marketplace platform tailored for 
 - **Order Management**: Complete order lifecycle management
 - **Vendor Payouts**: Automated commission and payout system
 
+### Infrastructure & Services
+- **ImageKit**: Real-time image optimization and CDN delivery
+- **Resend**: Modern email API for transactional emails
+- **Inngest**: Background jobs and workflow automation
+- **Redis (Upstash)**: Caching and session management
+
 ### Security & Monitoring
 - **Arcjet**: Advanced bot protection and rate limiting
 - **better-auth**: Secure authentication with password reset
@@ -42,6 +48,9 @@ A feature-rich, production-ready multi-vendor marketplace platform tailored for 
 - **Cache**: Redis (Upstash)
 - **Validation**: Zod
 - **Auth**: better-auth
+- **Email**: Resend
+- **File Storage**: ImageKit
+- **Background Jobs**: Inngest
 
 ### Frontend
 - **Framework**: Next.js 14 (App Router)
@@ -51,8 +60,11 @@ A feature-rich, production-ready multi-vendor marketplace platform tailored for 
 - **Data Fetching**: TanStack Query
 - **Forms**: React Hook Form + Zod
 
-### DevOps
+### Services & DevOps
 - **Hosting**: AWS / Railway
+- **Email**: Resend
+- **File Storage & CDN**: ImageKit
+- **Background Jobs**: Inngest
 - **CI/CD**: GitHub Actions
 - **Monitoring**: Sentry + Winston
 - **Code Quality**: ESLint + Prettier
@@ -97,7 +109,16 @@ npm run dev
 
 ### Environment Variables
 
-See `.env.example` files in each app directory.
+Required environment variables:
+- **Database**: PostgreSQL connection string
+- **Redis**: Upstash Redis URL
+- **M-Pesa**: Daraja API credentials
+- **ImageKit**: Public key, private key, URL endpoint
+- **Resend**: API key
+- **Inngest**: Event key, signing key (optional for development)
+- **JWT**: Secret for token signing
+
+See `.env.example` files and [SERVICES.md](./SERVICES.md) for detailed setup.
 
 ## 📦 Development
 

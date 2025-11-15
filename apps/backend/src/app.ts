@@ -9,6 +9,7 @@ import { logger } from './config/logger';
 import { initSentry, Sentry } from './config/sentry';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import { generalLimiter } from './middleware/rate-limit';
+import { inngestHandler } from './inngest';
 
 // Import routes (we'll create these)
 // import authRoutes from './routes/auth.routes';
@@ -59,6 +60,9 @@ export const createApp = (): Application => {
       environment: config.app.env,
     });
   });
+
+  // Inngest endpoint (background jobs)
+  app.use('/api/inngest', inngestHandler);
 
   // API Routes
   const apiRouter = express.Router();

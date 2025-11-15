@@ -31,12 +31,18 @@ const envSchema = z.object({
   MPESA_CALLBACK_URL: z.string().url(),
   MPESA_ENVIRONMENT: z.enum(['sandbox', 'production']).default('sandbox'),
 
-  // Email
-  SMTP_HOST: z.string().min(1),
-  SMTP_PORT: z.string().default('587'),
-  SMTP_USER: z.string().email(),
-  SMTP_PASSWORD: z.string().min(1),
+  // Email (Resend)
+  RESEND_API_KEY: z.string().min(1),
   EMAIL_FROM: z.string().email(),
+
+  // ImageKit (File Uploads & CDN)
+  IMAGEKIT_PUBLIC_KEY: z.string().min(1),
+  IMAGEKIT_PRIVATE_KEY: z.string().min(1),
+  IMAGEKIT_URL_ENDPOINT: z.string().url(),
+
+  // Inngest (Background Jobs)
+  INNGEST_EVENT_KEY: z.string().optional(),
+  INNGEST_SIGNING_KEY: z.string().optional(),
 
   // Monitoring
   SENTRY_DSN: z.string().optional(),
@@ -49,12 +55,6 @@ const envSchema = z.object({
 
   // Security
   ARCJET_KEY: z.string().optional(),
-
-  // AWS S3
-  AWS_ACCESS_KEY_ID: z.string().optional(),
-  AWS_SECRET_ACCESS_KEY: z.string().optional(),
-  AWS_REGION: z.string().default('us-east-1'),
-  AWS_S3_BUCKET: z.string().optional(),
 
   // Rate Limiting
   RATE_LIMIT_WINDOW_MS: z.string().default('900000'),
@@ -112,12 +112,18 @@ export const config = {
     callbackUrl: env.MPESA_CALLBACK_URL,
     environment: env.MPESA_ENVIRONMENT,
   },
-  email: {
-    host: env.SMTP_HOST,
-    port: parseInt(env.SMTP_PORT, 10),
-    user: env.SMTP_USER,
-    password: env.SMTP_PASSWORD,
+  resend: {
+    apiKey: env.RESEND_API_KEY,
     from: env.EMAIL_FROM,
+  },
+  imagekit: {
+    publicKey: env.IMAGEKIT_PUBLIC_KEY,
+    privateKey: env.IMAGEKIT_PRIVATE_KEY,
+    urlEndpoint: env.IMAGEKIT_URL_ENDPOINT,
+  },
+  inngest: {
+    eventKey: env.INNGEST_EVENT_KEY,
+    signingKey: env.INNGEST_SIGNING_KEY,
   },
   sentry: {
     dsn: env.SENTRY_DSN,
@@ -130,12 +136,6 @@ export const config = {
   },
   arcjet: {
     key: env.ARCJET_KEY,
-  },
-  aws: {
-    accessKeyId: env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-    region: env.AWS_REGION,
-    s3Bucket: env.AWS_S3_BUCKET,
   },
   rateLimit: {
     windowMs: parseInt(env.RATE_LIMIT_WINDOW_MS, 10),
