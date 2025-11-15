@@ -1,203 +1,176 @@
-# Multi-Vendor Marketplace - East Africa
+# Multi-Vendor Marketplace
 
-A feature-rich, production-ready multi-vendor marketplace platform tailored for East Africa, with M-Pesa integration, inventory management, delivery tracking, and more.
+A production-ready, feature-rich multi-vendor e-commerce marketplace platform tailored for East Africa, with M-Pesa payment integration.
 
-## 🚀 Features
+## Features
 
-### Core Marketplace
-- **Multi-vendor Support**: Onboard unlimited vendors with individual dashboards
-- **Product Management**: Advanced inventory tracking with low-stock alerts
-- **Smart Search**: AI-powered product recommendations based on user behavior
-- **Reviews & Ratings**: Customer feedback system with moderation
+### Core Functionality
+- 🛍️ **Multi-Vendor Support** - Scalable vendor onboarding and management system
+- 💳 **M-Pesa Integration** - Safaricom Daraja API for seamless mobile money payments
+- 📦 **Inventory Management** - Real-time stock tracking with low-stock alerts
+- 🚚 **Delivery Tracking** - Order fulfillment with status updates
+- ⭐ **Reviews & Ratings** - Customer feedback with verified purchases
+- 🏷️ **Categories** - Hierarchical product organization
+- 🔍 **Advanced Search** - Filter by price, category, vendor, and more
 
-### Payment & Transactions
-- **M-Pesa Integration**: Safaricom Daraja API for STK Push and B2C payouts
-- **Multi-currency**: KES support (expandable to UGX, TZS)
-- **Secure Payments**: PCI-compliant transaction handling
+### Technical Features
+- 🔐 **Authentication** - JWT-based auth with refresh tokens
+- 📧 **Email Service** - Beautiful transactional emails via Resend
+- 🖼️ **Image Management** - CDN-backed uploads via ImageKit
+- ⚡ **Background Jobs** - Async processing with Inngest
+- 📊 **Analytics** - PostHog integration for insights
+- 🛡️ **Security** - Rate limiting, Helmet, Arcjet protection
+- 🔍 **Monitoring** - Sentry error tracking with profiling
+- 📝 **Logging** - Winston with daily rotation
 
-### Operations
-- **Delivery Tracking**: Real-time order tracking
-- **Inventory Management**: Stock level monitoring across multiple vendors
-- **Order Management**: Complete order lifecycle management
-- **Vendor Payouts**: Automated commission and payout system
-
-### Infrastructure & Services
-- **ImageKit**: Real-time image optimization and CDN delivery
-- **Resend**: Modern email API for transactional emails
-- **Inngest**: Background jobs and workflow automation
-- **Redis (Upstash)**: Caching and session management
-
-### Security & Monitoring
-- **Arcjet**: Advanced bot protection and rate limiting
-- **better-auth**: Secure authentication with password reset
-- **Sentry**: Real-time error tracking
-- **Winston**: Comprehensive logging
-- **Helmet**: Security headers
-
-### Analytics
-- **PostHog**: Product analytics and feature flags
-- **Admin Dashboard**: Comprehensive marketplace analytics
-- **Vendor Analytics**: Sales and performance metrics
-
-## 🛠 Tech Stack
+## Tech Stack
 
 ### Backend
 - **Runtime**: Node.js 18+
-- **Framework**: Express.js + TypeScript
-- **Database**: PostgreSQL (Prisma ORM)
+- **Framework**: Express.js
+- **Language**: TypeScript
+- **Database**: PostgreSQL with Prisma ORM
 - **Cache**: Redis (Upstash)
 - **Validation**: Zod
-- **Auth**: better-auth
-- **Email**: Resend
-- **File Storage**: ImageKit
+- **Authentication**: JWT + better-auth
+- **File Upload**: Multer + ImageKit
 - **Background Jobs**: Inngest
 
 ### Frontend
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
-- **Styling**: TailwindCSS + shadcn/ui
-- **State**: Zustand
-- **Data Fetching**: TanStack Query
+- **UI Components**: shadcn/ui + Radix UI
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **Data Fetching**: TanStack Query (React Query)
 - **Forms**: React Hook Form + Zod
+- **HTTP Client**: Axios
 
-### Services & DevOps
-- **Hosting**: AWS / Railway
-- **Email**: Resend
-- **File Storage & CDN**: ImageKit
-- **Background Jobs**: Inngest
-- **CI/CD**: GitHub Actions
-- **Monitoring**: Sentry + Winston
-- **Code Quality**: ESLint + Prettier
-
-## 📁 Project Structure
-
-```
-marketplace-multi-vendor/
-├── apps/
-│   ├── backend/          # Express API
-│   └── frontend/         # Next.js app
-├── packages/
-│   ├── database/         # Prisma schema
-│   ├── types/            # Shared types
-│   └── config/           # Shared configs
-└── package.json
-```
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js 18+
 - PostgreSQL 14+
-- Redis (or Upstash account)
+- Redis
+- npm or yarn
 
 ### Installation
 
+1. Clone the repository:
 ```bash
-# Install dependencies
+git clone https://github.com/nmwakuni/mutivendor-ecommerce.git
+cd mutivendor-ecommerce
+```
+
+2. Install dependencies:
+```bash
 npm install
+```
 
-# Set up environment variables
-cp apps/backend/.env.example apps/backend/.env
-cp apps/frontend/.env.example apps/frontend/.env
+3. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
 
-# Run database migrations
-npm run db:migrate
+4. Set up the database:
+```bash
+cd apps/backend
+npx prisma generate
+npx prisma db push
+# Optional: Seed database
+npm run db:seed
+```
 
-# Start development servers
+5. Start development servers:
+```bash
+# From root directory
 npm run dev
 ```
 
-### Environment Variables
+The backend will run on http://localhost:5000 and frontend on http://localhost:3000.
 
-Required environment variables:
-- **Database**: PostgreSQL connection string
-- **Redis**: Upstash Redis URL
-- **M-Pesa**: Daraja API credentials
-- **ImageKit**: Public key, private key, URL endpoint
-- **Resend**: API key
-- **Inngest**: Event key, signing key (optional for development)
-- **JWT**: Secret for token signing
+## Docker Deployment
 
-See `.env.example` files and [SERVICES.md](./SERVICES.md) for detailed setup.
-
-## 📦 Development
+### Using Docker Compose
 
 ```bash
-# Run both apps in development
-npm run dev
+# Build and start all services
+docker-compose up -d
 
-# Run backend only
-npm run dev:backend
+# View logs
+docker-compose logs -f
 
-# Run frontend only
-npm run dev:frontend
-
-# Build for production
-npm run build
-
-# Lint code
-npm run lint
-
-# Format code
-npm run format
+# Stop services
+docker-compose down
 ```
 
-## 🏗 Architecture
+### Manual Docker Build
 
-### Backend Architecture
-- **Layered Architecture**: Controllers → Services → Repositories
-- **Middleware Pipeline**: Auth, validation, rate limiting, error handling
-- **Service Layer**: Business logic separation
-- **Repository Pattern**: Data access abstraction
-
-### Frontend Architecture
-- **App Router**: Next.js 14 app directory structure
-- **Server Components**: Optimized data fetching
-- **Client Components**: Interactive UI with Zustand
-- **API Layer**: TanStack Query for server state
-
-## 🔐 Security
-
-- Rate limiting with Arcjet
-- Helmet security headers
-- Input validation with Zod
-- SQL injection prevention (Prisma)
-- XSS protection
-- CSRF tokens
-- Secure session management
-
-## 📊 Database Schema
-
-### Key Entities
-- Users (Customers, Vendors, Admins)
-- Products & Inventory
-- Orders & OrderItems
-- Payments & Transactions
-- Reviews & Ratings
-- Delivery Tracking
-
-## 🚢 Deployment
-
-### Railway
 ```bash
-railway up
+# Build backend
+docker build -f apps/backend/Dockerfile -t marketplace-backend .
+
+# Build frontend
+docker build -f apps/frontend/Dockerfile -t marketplace-frontend .
+
+# Run containers
+docker run -p 5000:5000 marketplace-backend
+docker run -p 3000:3000 marketplace-frontend
 ```
 
-### AWS
-- EC2 for backend
-- RDS for PostgreSQL
-- ElastiCache for Redis
-- S3 for file storage
-- CloudFront for CDN
+## Scripts
 
-## 📄 License
+### Root
+- `npm run dev` - Start all development servers
+- `npm run build` - Build all apps
+- `npm run lint` - Lint all apps
+- `npm run format` - Format code with Prettier
+- `npm run test` - Run all tests
+- `npm run test:coverage` - Generate coverage reports
 
-MIT
+### Backend
+- `npm run dev --workspace=apps/backend` - Start backend dev server
+- `npm run build --workspace=apps/backend` - Build backend
+- `npm run test --workspace=apps/backend` - Run backend tests
+- `npm run db:generate` - Generate Prisma Client
+- `npm run db:push` - Push schema to database
+- `npm run db:migrate` - Run migrations
+- `npm run db:studio` - Open Prisma Studio
 
-## 👥 Contributing
+### Frontend
+- `npm run dev --workspace=apps/frontend` - Start frontend dev server
+- `npm run build --workspace=apps/frontend` - Build frontend
+- `npm run test --workspace=apps/frontend` - Run frontend tests
 
-Contributions welcome! Please read our contributing guidelines.
+## Testing
 
----
+The project includes comprehensive test coverage:
 
-Built with ❤️ for East Africa
+- **Backend**: Jest + Supertest for API testing
+- **Frontend**: Jest + React Testing Library for component testing
+
+Run tests:
+```bash
+npm run test              # All tests
+npm run test:coverage     # With coverage reports
+```
+
+## CI/CD
+
+GitHub Actions workflows are configured for:
+
+1. **Continuous Integration** (`.github/workflows/ci.yml`)
+   - Linting and formatting checks
+   - TypeScript type checking
+   - Unit and integration tests
+   - Build verification
+
+2. **Docker Build & Push** (`.github/workflows/docker-build-push.yml`)
+   - Build Docker images
+   - Push to GitHub Container Registry (ghcr.io)
+   - Automatic tagging based on branches and releases
+
+## License
+
+This project is licensed under the MIT License.
