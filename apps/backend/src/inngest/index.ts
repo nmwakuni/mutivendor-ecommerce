@@ -25,6 +25,19 @@ import {
   trackCartAbandonment,
 } from './functions/engagement.functions';
 
+import {
+  expireLoyaltyPoints,
+  autoReleaseEscrows,
+  recordVendorAnalytics,
+  checkVerificationExpiry,
+  checkPriceAlerts,
+  sendLowStockAlerts,
+  cleanupOldFraudScores,
+  trackCartAbandonment as trackCartAbandonmentNew,
+  sendCartAbandonmentReminder as sendCartAbandonmentReminderNew,
+  autoApproveCommissions,
+} from './functions/automation.functions';
+
 // Export all functions
 export const functions = [
   // Email functions
@@ -55,6 +68,18 @@ export const functions = [
   sendCartAbandonmentReminder,
   sendOrderConfirmationWithRecommendations,
   trackCartAbandonment,
+
+  // Automation functions (Cron jobs)
+  expireLoyaltyPoints,
+  autoReleaseEscrows,
+  recordVendorAnalytics,
+  checkVerificationExpiry,
+  checkPriceAlerts,
+  sendLowStockAlerts,
+  cleanupOldFraudScores,
+  trackCartAbandonmentNew,
+  sendCartAbandonmentReminderNew,
+  autoApproveCommissions,
 ];
 
 // Create Inngest serve handler for Express
