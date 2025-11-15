@@ -20,6 +20,7 @@ import paymentRoutes from './routes/payment.routes';
 import categoryRoutes from './routes/category.routes';
 import reviewRoutes from './routes/review.routes';
 import couponRoutes from './routes/coupon.routes';
+import advancedRoutes from './routes/index'; // Advanced features routes
 
 export const createApp = (): Application => {
   const app = express();
@@ -79,6 +80,9 @@ export const createApp = (): Application => {
   apiRouter.use('/categories', categoryRoutes);
   apiRouter.use('/reviews', reviewRoutes);
   apiRouter.use('/coupons', couponRoutes);
+
+  // Advanced features routes (loyalty, affiliates, livestreams, chatbot, social, escrow, verification, notifications, analytics)
+  apiRouter.use('/', advancedRoutes);
 
   app.use('/api/v1', apiRouter);
 
