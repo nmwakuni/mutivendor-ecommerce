@@ -86,6 +86,7 @@ model User {
   reviews           Review[]
   cart              CartItem[]
   wishlist          Wishlist[]
+  userCoupons       UserCoupon[]
 
   @@index([email])
   @@index([phone])
@@ -135,6 +136,7 @@ model Vendor {
   products        Product[]
   orders          Order[]
   payouts         Payout[]
+  coupons         Coupon[]
 
   @@index([status])
   @@index([businessName])
@@ -157,6 +159,7 @@ model Category {
   updatedAt   DateTime  @updatedAt
 
   products    Product[]
+  coupons     Coupon[]
 
   @@index([slug])
   @@index([parentId])
@@ -245,6 +248,12 @@ model Order {
   shippingFee     Float         @default(0)
   discount        Float         @default(0)
   total           Float
+
+  // Coupon
+  couponId        String?
+  coupon          Coupon?       @relation(fields: [couponId], references: [id])
+  couponCode      String?
+  couponDiscount  Float         @default(0)
 
   // Commission
   commissionRate  Float
@@ -530,4 +539,72 @@ model Payout {
 
   @@index([vendorId])
   @@index([status])
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_SHIPPING
+}
+
+model Coupon {
+  id              String      @id @default(cuid())
+
+  code            String      @unique
+  type            CouponType
+  value           Float       // Percentage (0-100) or fixed amount
+
+  description     String?
+
+  // Restrictions
+  minPurchase     Float?      // Minimum order amount
+  maxDiscount     Float?      // Maximum discount amount (for percentage)
+  usageLimit      Int?        // Total usage limit
+  usagePerUser    Int?        // Usage limit per user
+
+  // Applicability
+  categoryId      String?
+  category        Category?   @relation(fields: [categoryId], references: [id])
+  vendorId        String?
+  vendor          Vendor?     @relation(fields: [vendorId], references: [id])
+  productIds      String[]    @default([])  // Specific products
+
+  // Status
+  isActive        Boolean     @default(true)
+
+  // Time constraints
+  startDate       DateTime?
+  expiryDate      DateTime?
+
+  // Usage tracking
+  timesUsed       Int         @default(0)
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  orders          Order[]
+  userCoupons     UserCoupon[]
+
+  @@index([code])
+  @@index([isActive])
+  @@index([expiryDate])
+}
+
+model UserCoupon {
+  id          String   @id @default(cuid())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  couponId    String
+  coupon      Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  timesUsed   Int      @default(0)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, couponId])
+  @@index([userId])
+  @@index([couponId])
 }

@@ -19,6 +19,7 @@ import vendorRoutes from './routes/vendor.routes';
 import paymentRoutes from './routes/payment.routes';
 import categoryRoutes from './routes/category.routes';
 import reviewRoutes from './routes/review.routes';
+import couponRoutes from './routes/coupon.routes';
 
 export const createApp = (): Application => {
   const app = express();
@@ -77,6 +78,7 @@ export const createApp = (): Application => {
   apiRouter.use('/payments', paymentRoutes);
   apiRouter.use('/categories', categoryRoutes);
   apiRouter.use('/reviews', reviewRoutes);
+  apiRouter.use('/coupons', couponRoutes);
 
   app.use('/api/v1', apiRouter);
 

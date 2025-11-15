@@ -18,6 +18,13 @@ import { alertLowStock, processInventoryUpdate } from './functions/inventory.fun
 
 import { processVendorPayout, handleVendorApproval } from './functions/vendor.functions';
 
+import {
+  sendWelcomeEmail as sendWelcomeEmailEngagement,
+  sendCartAbandonmentReminder,
+  sendOrderConfirmationWithRecommendations,
+  trackCartAbandonment,
+} from './functions/engagement.functions';
+
 // Export all functions
 export const functions = [
   // Email functions
@@ -42,6 +49,12 @@ export const functions = [
   // Vendor functions
   processVendorPayout,
   handleVendorApproval,
+
+  // Engagement functions
+  sendWelcomeEmailEngagement,
+  sendCartAbandonmentReminder,
+  sendOrderConfirmationWithRecommendations,
+  trackCartAbandonment,
 ];
 
 // Create Inngest serve handler for Express
