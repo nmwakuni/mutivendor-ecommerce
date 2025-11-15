@@ -2,13 +2,12 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export interface CartItem {
-  productId: string;
+  id: string;
   name: string;
   price: number;
   quantity: number;
   image?: string;
-  vendorId: string;
-  vendorName: string;
+  stock: number;
 }
 
 interface CartStore {
@@ -17,8 +16,8 @@ interface CartStore {
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
-  getTotalItems: () => number;
-  getTotalPrice: () => number;
+  getItemCount: () => number;
+  getTotal: () => number;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -28,12 +27,12 @@ export const useCartStore = create<CartStore>()(
 
       addItem: (item) =>
         set((state) => {
-          const existingItem = state.items.find((i) => i.productId === item.productId);
+          const existingItem = state.items.find((i) => i.id === item.id);
 
           if (existingItem) {
             return {
               items: state.items.map((i) =>
-                i.productId === item.productId ? { ...i, quantity: i.quantity + item.quantity } : i
+                i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
               ),
             };
           }
@@ -43,24 +42,24 @@ export const useCartStore = create<CartStore>()(
 
       removeItem: (productId) =>
         set((state) => ({
-          items: state.items.filter((item) => item.productId !== productId),
+          items: state.items.filter((item) => item.id !== productId),
         })),
 
       updateQuantity: (productId, quantity) =>
         set((state) => ({
           items: state.items.map((item) =>
-            item.productId === productId ? { ...item, quantity } : item
+            item.id === productId ? { ...item, quantity } : item
           ),
         })),
 
       clearCart: () => set({ items: [] }),
 
-      getTotalItems: () => {
+      getItemCount: () => {
         const { items } = get();
         return items.reduce((total, item) => total + item.quantity, 0);
       },
 
-      getTotalPrice: () => {
+      getTotal: () => {
         const { items } = get();
         return items.reduce((total, item) => total + item.price * item.quantity, 0);
       },
