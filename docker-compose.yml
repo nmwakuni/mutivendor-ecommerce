@@ -1,28 +1,47 @@
+# ==========================================
+# Docker Compose for Multi-Vendor Marketplace
+# Production-ready with all services
+# ==========================================
+
 version: '3.8'
 
 services:
+  # ==========================================
+  # PostgreSQL Database
+  # ==========================================
   postgres:
     image: postgres:16-alpine
     container_name: marketplace-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-marketplace}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-marketplace123}
       POSTGRES_DB: ${POSTGRES_DB:-marketplace}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - '5432:5432'
+      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U marketplace']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-marketplace}']
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
+    networks:
+      - marketplace-network
 
+  # ==========================================
+  # Redis Cache & Session Store
+  # ==========================================
   redis:
     image: redis:7-alpine
     container_name: marketplace-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
     ports:
-      - '6379:6379'
+      - '${REDIS_PORT:-6379}:6379'
     volumes:
       - redis_data:/data
     healthcheck:
@@ -30,42 +49,147 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
+    networks:
+      - marketplace-network
 
+  # ==========================================
+  # Backend API (Express + TypeScript)
+  # ==========================================
   backend:
     build:
       context: .
       dockerfile: apps/backend/Dockerfile
+      target: runner
+      args:
+        NODE_ENV: ${NODE_ENV:-production}
     container_name: marketplace-backend
+    restart: unless-stopped
     ports:
-      - '5000:5000'
+      - '${BACKEND_PORT:-3001}:3001'
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      PORT: 5000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-marketplace}:${POSTGRES_PASSWORD:-marketplace123}@postgres:5432/${POSTGRES_DB:-marketplace}
-      REDIS_URL: redis://redis:6379
+      # Node & App
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3001
+
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-marketplace}:${POSTGRES_PASSWORD:-marketplace123}@postgres:5432/${POSTGRES_DB:-marketplace}?schema=public
+
+      # Redis
+      REDIS_URL: redis://${REDIS_PASSWORD:+:${REDIS_PASSWORD}@}redis:6379
+
+      # JWT & Security
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      JWT_EXPIRY: ${JWT_EXPIRY:-7d}
+
+      # CORS
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      BACKEND_URL: ${BACKEND_URL:-http://localhost:3001}
+
+      # File Upload (ImageKit)
+      IMAGEKIT_PUBLIC_KEY: ${IMAGEKIT_PUBLIC_KEY:-}
+      IMAGEKIT_PRIVATE_KEY: ${IMAGEKIT_PRIVATE_KEY:-}
+      IMAGEKIT_URL_ENDPOINT: ${IMAGEKIT_URL_ENDPOINT:-}
+
+      # Email (Resend)
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+
+      # Analytics & Monitoring
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      POSTHOG_API_KEY: ${POSTHOG_API_KEY:-}
+
+      # Inngest
+      INNGEST_EVENT_KEY: ${INNGEST_EVENT_KEY:-}
+      INNGEST_SIGNING_KEY: ${INNGEST_SIGNING_KEY:-}
+
+      # AI (OpenAI/Anthropic for chatbot)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+
+      # WhatsApp Business API
+      WHATSAPP_API_TOKEN: ${WHATSAPP_API_TOKEN:-}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - marketplace-network
+    # Optional: mount source code for development
+    # volumes:
+    #   - ./apps/backend/src:/app/src
 
+  # ==========================================
+  # Frontend (Next.js)
+  # ==========================================
   frontend:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
+      target: runner
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:3001}
     container_name: marketplace-frontend
-    ports:
-      - '3000:3000'
-    environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000}
-    depends_on:
-      - backend
     restart: unless-stopped
+    ports:
+      - '${FRONTEND_PORT:-3000}:3000'
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:3001}
+      NEXT_TELEMETRY_DISABLED: 1
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://localhost:3000', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - marketplace-network
 
+  # ==========================================
+  # Optional: Nginx Reverse Proxy
+  # Uncomment to use nginx as reverse proxy
+  # ==========================================
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: marketplace-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - '80:80'
+  #     - '443:443'
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - backend
+  #     - frontend
+  #   networks:
+  #     - marketplace-network
+
+# ==========================================
+# Networks
+# ==========================================
+networks:
+  marketplace-network:
+    driver: bridge
+
+# ==========================================
+# Volumes
+# ==========================================
 volumes:
   postgres_data:
+    driver: local
   redis_data:
+    driver: local
