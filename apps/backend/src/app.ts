@@ -4,12 +4,14 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import swaggerUi from 'swagger-ui-express';
 import { config } from './config/env';
 import { logger } from './config/logger';
 import { initSentry, Sentry } from './config/sentry';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import { generalLimiter } from './middleware/rate-limit';
 import { inngestHandler } from './inngest';
+import { swaggerSpec } from './config/swagger';
 
 // Import routes
 import authRoutes from './routes/auth.routes';
@@ -64,6 +66,22 @@ export const createApp = (): Application => {
       environment: config.app.env,
     });
   });
+
+  // API Documentation (Swagger UI)
+  app.use('/api-docs', swaggerUi.serve);
+  app.get('/api-docs', swaggerUi.setup(swaggerSpec, {
+    explorer: true,
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Marketplace API Documentation',
+  }));
+
+  // Swagger JSON endpoint
+  app.get('/api-docs.json', (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
+
+  logger.info('API documentation available at /api-docs');
 
   // Inngest endpoint (background jobs)
   app.use('/api/inngest', inngestHandler);

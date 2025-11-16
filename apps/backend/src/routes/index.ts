@@ -1,3 +1,13 @@
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
 import { Router } from 'express';
 import { authenticate, authorizeRoles } from '../middleware/auth';
 
@@ -17,6 +27,71 @@ const router = Router();
 // ============================================
 // LOYALTY & REWARDS ROUTES
 // ============================================
+
+/**
+ * @swagger
+ * /loyalty/balance:
+ *   get:
+ *     tags: [Loyalty & Rewards]
+ *     summary: Get user's loyalty points balance
+ *     description: Returns the current loyalty points balance and tier information for the authenticated user
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved balance
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     balance:
+ *                       type: integer
+ *                     tier:
+ *                       type: object
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+
+/**
+ * @swagger
+ * /loyalty/rewards:
+ *   get:
+ *     tags: [Loyalty & Rewards]
+ *     summary: Get available rewards
+ *     description: Returns list of all available rewards that can be redeemed with loyalty points
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved rewards list
+ */
+
+/**
+ * @swagger
+ * /loyalty/rewards/{rewardId}/redeem:
+ *   post:
+ *     tags: [Loyalty & Rewards]
+ *     summary: Redeem a reward
+ *     description: Redeem a reward using loyalty points
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: rewardId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Reward redeemed successfully
+ *       400:
+ *         description: Insufficient points or invalid reward
+ */
+
 const loyaltyRouter = Router();
 
 // User routes
@@ -93,6 +168,73 @@ router.use('/livestreams', livestreamRouter);
 // ============================================
 // CHATBOT ROUTES
 // ============================================
+
+/**
+ * @swagger
+ * /chatbot/message:
+ *   post:
+ *     tags: [Chatbot]
+ *     summary: Send message to AI chatbot
+ *     description: Send a message to the AI-powered chatbot and receive intelligent responses
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - message
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 description: User's message to the chatbot
+ *               sessionId:
+ *                 type: string
+ *                 description: Optional session ID for conversation continuity
+ *     responses:
+ *       200:
+ *         description: Chatbot response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                     sessionId:
+ *                       type: string
+ *                     suggestions:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ */
+
+/**
+ * @swagger
+ * /chatbot/history:
+ *   get:
+ *     tags: [Chatbot]
+ *     summary: Get chat history
+ *     description: Retrieve conversation history for the authenticated user
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: sessionId
+ *         in: query
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Chat history retrieved successfully
+ */
+
 const chatbotRouter = Router();
 
 // User routes
@@ -205,6 +347,83 @@ router.use('/verification', verificationRouter);
 // ============================================
 // NOTIFICATION ROUTES
 // ============================================
+
+/**
+ * @swagger
+ * /notifications:
+ *   get:
+ *     tags: [Notifications]
+ *     summary: Get user notifications
+ *     description: Retrieve paginated list of notifications for the authenticated user
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/pageParam'
+ *       - $ref: '#/components/parameters/limitParam'
+ *       - name: unreadOnly
+ *         in: query
+ *         description: Filter to show only unread notifications
+ *         schema:
+ *           type: boolean
+ *     responses:
+ *       200:
+ *         description: Notifications retrieved successfully
+ */
+
+/**
+ * @swagger
+ * /notifications/unread-count:
+ *   get:
+ *     tags: [Notifications]
+ *     summary: Get unread notification count
+ *     description: Get the count of unread notifications for quick badge display
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Unread count retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     count:
+ *                       type: integer
+ */
+
+/**
+ * @swagger
+ * /notifications/price-alerts:
+ *   post:
+ *     tags: [Notifications]
+ *     summary: Create price alert
+ *     description: Set up a price alert to be notified when a product reaches target price
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - productId
+ *               - targetPrice
+ *             properties:
+ *               productId:
+ *                 type: string
+ *               targetPrice:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Price alert created successfully
+ */
+
 const notificationRouter = Router();
 
 // User routes
@@ -240,6 +459,93 @@ router.use('/notifications', notificationRouter);
 // ============================================
 // VENDOR ANALYTICS ROUTES
 // ============================================
+
+/**
+ * @swagger
+ * /vendor-analytics/dashboard:
+ *   get:
+ *     tags: [Vendor Analytics]
+ *     summary: Get vendor dashboard overview
+ *     description: Comprehensive dashboard with key metrics for vendor performance
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     revenue:
+ *                       type: object
+ *                     orders:
+ *                       type: object
+ *                     customers:
+ *                       type: object
+ *                     products:
+ *                       type: object
+ */
+
+/**
+ * @swagger
+ * /vendor-analytics/sales:
+ *   get:
+ *     tags: [Vendor Analytics]
+ *     summary: Get sales analytics
+ *     description: Detailed sales analytics with time-series data
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: startDate
+ *         in: query
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - name: endDate
+ *         in: query
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - name: groupBy
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: [day, week, month]
+ *           default: day
+ *     responses:
+ *       200:
+ *         description: Sales analytics retrieved
+ */
+
+/**
+ * @swagger
+ * /vendor-analytics/forecast:
+ *   get:
+ *     tags: [Vendor Analytics]
+ *     summary: Get revenue forecast
+ *     description: AI-powered revenue forecasting based on historical data
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: months
+ *         in: query
+ *         description: Number of months to forecast
+ *         schema:
+ *           type: integer
+ *           default: 3
+ *           minimum: 1
+ *           maximum: 12
+ *     responses:
+ *       200:
+ *         description: Revenue forecast generated
+ */
+
 const vendorAnalyticsRouter = Router();
 
 // Vendor routes
